@@ -35,7 +35,7 @@ end
 
 % Compute R from starting from XtX
 d = size(X,2);
-if isfield(opt,'kernel');
+if isprop(opt,'kernel');
     if isfield(opt.kernel,'XtX');
         XtX = opt.kernel.XtX;
     else

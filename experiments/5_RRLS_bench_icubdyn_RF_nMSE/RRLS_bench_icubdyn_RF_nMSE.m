@@ -20,7 +20,7 @@
 
 % Initialization
 
-clear all;
+clearAllButBP;
 
 % Dataset parameters
 p = 15000;  % Initialization training set size
@@ -30,7 +30,7 @@ p = 15000;  % Initialization training set size
 numRF = 500;
 
 % Number of overall iterations
-numIter = 20;
+numIter = 5;
 
 % Load dataset
 datasetFileName = 'icubdyn.dat';
@@ -64,8 +64,11 @@ XtrInit = Xset( 1:p , : );
 ytrInit = yset( 1:p , : );
 
 % Set arrays containing test/recursive-update set
-Xte = Xset( p+1:totalSize , : );
-yte = yset( p+1:totalSize , : );
+numUpdates = 100;
+% numUpdates = totalSize-p;
+
+Xte = Xset( p+1:p+numUpdates , : );
+yte = yset( p+1:p+numUpdates, : );
 
 % Compute output variance for each output on the test set
 outVar = var(yte);
@@ -94,7 +97,7 @@ for iRF = numRF
         j
 
         name = 'BatchRLSRandFeats';
-        optBatch = defopt(name);
+        optBatch = gurls_defopt(name);
         optBatch.seq = { 'split:ho' , 'paramsel:horandfeats' , 'rls:randfeats' , ...
             'pred:randfeats' , 'perf:rmse'};
 
@@ -134,8 +137,8 @@ for iRF = numRF
 
         % Pipeline definition
         name = 'RecursiveRLSCholesky';
-        optRec = defopt(name);
-        optRec.paramsel.lambdas = optBatch.paramsel.lambdas;
+        optRec = gurls_defopt(name);
+        optRec.newprop('paramsel.lambdas' , optBatch.paramsel.lambdas);
 
         optRec.seq = { 'rls:primalrecinitcholesky' };
         %optRec.seq = { 'split:ho' , 'paramsel:hoprimal' , 'rls:primalrecinitcholesky' };
@@ -150,7 +153,7 @@ for iRF = numRF
 
         % Predict (out of sample) & update (rank-1)
         nSE = zeros( 1 , 6 );
-        optRec.pred = zeros(size(yte));
+        optRec.newprop('pred', zeros(size(yte)));
         
         for i = 1 : size(Xte,1)
 

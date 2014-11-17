@@ -11,7 +11,7 @@ numExp = 20; % Number of experiment executions
 q = 5000;   % Training subsets size
 p = 5000;   % Test subsets size
 
-nLambda = 1000;  % Number of lambda guesses
+nLambda = 10;  % Number of lambda guesses
 
 % Load dataset
 %load icubdyn_ABC;
